@@ -48,21 +48,29 @@ class _MarksheetHomePageState extends State<MarksheetHomePage> {
   final int maxAttempts = 3;
   final String correctPermissionKey = "1234";
 
-  Future<void> pickExcelFile() async {
-    html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-    uploadInput.accept = '.xlsx';
-    uploadInput.click();
+  Future<void> loadExcelFromAssets() async {
+    // Load the file from assets
+    ByteData data = await rootBundle.load('assets/yash.xlsx');
 
-    uploadInput.onChange.listen((e) async {
-      final file = uploadInput.files!.first;
-      final reader = html.FileReader();
-      reader.readAsArrayBuffer(file);
-      reader.onLoadEnd.listen((event) {
-        setState(() {
-          excelBytes = reader.result as Uint8List;
-        });
-      });
-    });
+    // Convert to Uint8List
+    excelBytes = data.buffer.asUint8List();
+
+    // Decode the Excel
+    var excel = Excel.decodeBytes(excelBytes!);
+
+    // Print Excel content
+    for (var table in excel.tables.keys) {
+      print('Table: $table');
+      for (var row in excel.tables[table]!.rows) {
+        print(row.map((cell) => cell?.value)); // Print each row
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadExcelFromAssets();
   }
 
   void fetchData() {
@@ -80,7 +88,10 @@ class _MarksheetHomePageState extends State<MarksheetHomePage> {
               'Subject1': row[2]?.value.toString(),
               'Subject2': row[3]?.value.toString(),
               'Subject3': row[4]?.value.toString(),
-              'Average': row[5]?.value.toString(),
+              'Subject4': row[5]?.value.toString(),
+              'Subject5': row[6]?.value.toString(),
+              'Subject6': row[7]?.value.toString(),
+              'Average': row[8]?.value.toString(),
             };
           });
           return;
@@ -144,6 +155,19 @@ class _MarksheetHomePageState extends State<MarksheetHomePage> {
                   "Subject 3: ${studentData!['Subject3']}",
                   style: pw.TextStyle(fontSize: 14),
                 ),
+                pw.Text(
+                  "Subject 4: ${studentData!['Subject4']}",
+                  style: pw.TextStyle(fontSize: 14),
+                ),
+                pw.Text(
+                  "Subject 5: ${studentData!['Subject5']}",
+                  style: pw.TextStyle(fontSize: 14),
+                ),
+
+                pw.Text(
+                  "Subject 6: ${studentData!['Subject6']}",
+                  style: pw.TextStyle(fontSize: 14),
+                ),
                 pw.SizedBox(height: 10),
                 pw.Text(
                   "Average: ${studentData!['Average']}",
@@ -200,22 +224,22 @@ class _MarksheetHomePageState extends State<MarksheetHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Student Digital Sign App')),
+      appBar: AppBar(
+        title: Text('Student Digital Sign App'),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 137, 147, 203),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ElevatedButton.icon(
-              onPressed: pickExcelFile,
-              icon: Icon(Icons.upload_file),
-              label: Text('Select Excel File'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.indigo.shade200,
-                foregroundColor: Colors.white,
-              ),
+            SizedBox(height: 25),
+            Text(
+              'Enter Defualt Student ID as 1001 to Fetch Data',
+              style: TextStyle(fontSize: 14),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 15),
             TextField(
               decoration: InputDecoration(
                 labelText: 'Enter Student ID',
@@ -224,7 +248,17 @@ class _MarksheetHomePageState extends State<MarksheetHomePage> {
               onChanged: (value) => studentId = value,
             ),
             SizedBox(height: 16),
-            ElevatedButton(onPressed: fetchData, child: Text('Fetch Data')),
+            ElevatedButton(
+                onPressed: fetchData,
+                style: ElevatedButton.styleFrom(
+                  // backgroundColor: Colors.indigo.shade200,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
+                child: Text('Fetch Data')),
             SizedBox(height: 20),
             if (studentData != null) ...[
               Card(
@@ -242,11 +276,29 @@ class _MarksheetHomePageState extends State<MarksheetHomePage> {
                       Text('Subject 1: ${studentData!['Subject1']}'),
                       Text('Subject 2: ${studentData!['Subject2']}'),
                       Text('Subject 3: ${studentData!['Subject3']}'),
+                      Text('Subject 4: ${studentData!['Subject4']}'),
+                      Text('Subject 5: ${studentData!['Subject5']}'),
+                      Text('Subject 6: ${studentData!['Subject6']}'),
                       Text('Average: ${studentData!['Average']}'),
                       SizedBox(height: 12),
                       ElevatedButton(
                         onPressed: generatePDF,
-                        child: Text('Go To Downlaod  File'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.indigo.shade200,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                        ),
+                        child: const Text(
+                          'Go To Download File',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),

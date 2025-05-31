@@ -136,7 +136,16 @@ class _DigitalSignaturePageState extends State<DigitalSignaturePage> {
           children: [
             ElevatedButton(
               onPressed: pickPDF,
-              child: Text('downlaod File with Permission Key'),
+              style: ElevatedButton.styleFrom(
+                // backgroundColor: Colors.indigo.shade200,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              child: Text('Downlaod File with Permission Key',
+                  style: TextStyle(fontSize: 14)),
             ),
             SizedBox(height: 30),
             if (latestSignedFileBytes != null) ...[
